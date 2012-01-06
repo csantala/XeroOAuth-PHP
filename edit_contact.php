@@ -6,7 +6,7 @@
 	$xero = new Xero;
 	
 	function check_for_exception($client_data) {
-		// if this data structure is not retured then we have an exception; dump exception and exit.
+		// if this data structure is not returned then we have an exception; dump exception and exit.
 		if (! isset($client_data->Contacts->Contact->ContactID)) {
 			echo "<pre>"; print_r($client_data); echo "</pre>"; exit;
 		}
