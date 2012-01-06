@@ -5,5 +5,5 @@ SETUP
 1.3. set consumer_key and shared_secret
 
 XERO APP SETTINGS (https://api.xero.com/Application)
-URL of your copany or product: https://[domain]/[path]/authorise.php
+URL of your company or product: https://[domain]/[path]/authorise.php
 OAuth callback domaing: [domain]
