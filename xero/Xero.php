@@ -426,9 +426,9 @@ class Xero extends Xro_config {
 	protected function set_curl_options() {
 		
 		if ($this->xro_app_type == "Partner") {
-			$options[CURLOPT_SSLCERT] = '/var/www/html/proptuts/ssl/entrust-cert.pem';
-			$options[CURLOPT_SSLKEYPASSWD] = 'magnetic'; 
-			$options[CURLOPT_SSLKEY] = '/var/www/html/proptuts/ssl/entrust-private.pem';
+			$options[CURLOPT_SSLCERT] = 'path/entrust-cert.pem';
+			$options[CURLOPT_SSLKEYPASSWD] = '[password]
+			$options[CURLOPT_SSLKEY] = 'path/entrust-private.pem';
 		}
 		$options[CURLOPT_VERBOSE] = 1;
     	$options[CURLOPT_RETURNTRANSFER] = 1;
