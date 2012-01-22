@@ -6,4 +6,4 @@ SETUP
 
 XERO APP SETTINGS (https://api.xero.com/Application)
 URL of your company or product: https://[domain]/[path]/authorise.php
-OAuth callback domaing: [domain]
+OAuth callback domain: [domain]
