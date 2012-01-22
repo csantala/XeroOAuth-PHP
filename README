@@ -1,9 +1,0 @@
-SETUP
-1. edit Xro_config.php
-1.1 set $xro_app_type
-1.2 set $oauth_callback to point to authorise.php (ie https://domain.com/authorise.php)
-1.3. set consumer_key and shared_secret
-
-XERO APP SETTINGS (https://api.xero.com/Application)
-URL of your company or product: https://[domain]/[path]/authorise.php
-OAuth callback domaing: [domain]

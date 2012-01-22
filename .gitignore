@@ -22,3 +22,5 @@ certs/privatekey14102011.pem
 .gitignore
 
 .gitignore
+
+.DS_STORE

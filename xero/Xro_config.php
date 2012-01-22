@@ -1,20 +1,18 @@
 <?php
 	
 	class Xro_config
-	{	
-		protected $debug = FALSE;
+	{
 		
-		// public, partner, or private
-		protected $xro_app_type = ""; 
+		protected $xro_app_type = "Public";
 		
 		// local
 		protected $oauth_callback = '';
 		
 		// staging
 		//protected $oauth_callback = '';
-	
+		
 		// production
-		//private $oauth_callback = '';
+		//protected $oauth_callback = '';
 		                       	 
 		protected $signatures = array(
 			// local
@@ -28,8 +26,7 @@
 			// production
 			//'consumer_key' => '',
 			//'shared_secret' => '',
-			// 'rsa_private_key' => '/[path]/[privatekey].pem',
-			// 'rsa_public_key'	=> '/[path]/[publickey].cer'
+			// 'rsa_private_key' => BASE_PATH . '/certs/rq-partner-app-2-privatekey.pem',
+			// 'rsa_public_key'	=> BASE_PATH . '/certs/rq-partner-app-2-publickey.cer'
 		 );
 	}
-?>
