@@ -1,0 +1,7 @@
+Xero library for Codeigniter by Chris Santala 2012
+
+Setup
+1. place entire xero folder in library dir
+2. configure Xro_config.php:
+2.1 set app type (Public, Partner, or Private)
+2.2 set consumer_key, shared_secret, and/or paths for rsa_private_key and rsa_public_key
