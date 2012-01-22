@@ -2,7 +2,7 @@
 	
 	class Xro_config
 	{
-		
+		// Public, Partner, or Private
 		protected $xro_app_type = "Public";
 		
 		// local
@@ -26,7 +26,7 @@
 			// production
 			//'consumer_key' => '',
 			//'shared_secret' => '',
-			// 'rsa_private_key' => BASE_PATH . '/certs/rq-partner-app-2-privatekey.pem',
-			// 'rsa_public_key'	=> BASE_PATH . '/certs/rq-partner-app-2-publickey.cer'
+			// 'rsa_private_key' => '/certs/rq-partner-app-2-privatekey.pem',
+			// 'rsa_public_key' => '/certs/rq-partner-app-2-publickey.cer'
 		 );
 	}
