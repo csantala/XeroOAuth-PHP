@@ -209,9 +209,8 @@ class Xero extends Xro_config {
 	    
 	    $this->signatures['oauth_token'] = $access_token;
 	    $this->signatures['oauth_secret'] = $access_token_secret;
-	    if ($this->xro_app_type =! "Public") {
-			$this->signatures['oauth_session_handle'] = $oauth_session_handle;
-		}
+ 	    $this->signatures['oauth_session_handle'] = $oauth_session_handle;
+	
 	    //////////////////////////////////////////////////////////////////////
 	
 		return $this->signatures; 
@@ -227,8 +226,8 @@ class Xero extends Xro_config {
 		$oauthObject = new OAuthSimple();
 		
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
-	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
-	    $this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
+	   	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
+	    	$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
 	    //////////////////////////////////////////////////////////////////////
 
 	    // Xero API Access:
