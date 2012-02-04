@@ -1,7 +1,31 @@
-Xero library for Codeigniter by Chris Santala 2012
+Xero library for CodeIgniter by Chris Santala 2012
 
 Setup
-1. place entire xero folder in library dir
+1. place xero folder in CI application/library dir
 2. configure Xro_config.php:
 2.1 set app type (Public, Partner, or Private)
 2.2 set consumer_key, shared_secret, and/or paths for rsa_private_key and rsa_public_key
+
+Sample Code
+1. place controllers/xero_authorize.php and xero_demo.php files in CI controllers directory 
+2. place views/xero_demo.php file in CI views directory
+
+Xero Application settings at https://api.xero.com/Application
+
+URL of your company or product:
+https://[yourdomain]/xero_authorize
+(this url should point to the xero_authorize controller)
+
+OAuth callback domain
+ablitica.com
+
+See the demo in action here:
+https://ablitica.com/dev/codeigniter/xero_demo
+
+Gotchas:
++ if you're saving an access token in the db and want to renew it later, ensure that it
+remains as the most recent one created or it will be rejected if another access token was created.
++ user of oauth_session_handle may cause errors in public applications.
++ This library has not been tested with a Private app.
+
+Improvements or suggestions appreciated - csantala@gmail.com.

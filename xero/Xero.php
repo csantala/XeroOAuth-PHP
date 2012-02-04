@@ -3,7 +3,7 @@
 /**
   * Xero.php
   * 
-  * A Xero API authentication and usage library for Codeigniter.
+  * A Xero OAuth1.0a authentication and API library for Codeigniter.
   * 
   * Constructed from code by Ronan Quirke
   * @link https://github.com/XeroAPI/XeroOAuth-PHP 
@@ -198,7 +198,7 @@ class Xero extends Xro_config {
 				parse_str($r, $returned_items);		   
 				$access_token = $returned_items['oauth_token'];
 				$access_token_secret = $returned_items['oauth_token_secret'];
-				// $oauth_session_handle = $returned_items['oauth_session_handle'];
+				$oauth_session_handle = $returned_items['oauth_session_handle'];
 			} 
 			else {
 				$access_token = $this->signatures['oauth_token'];
@@ -209,9 +209,7 @@ class Xero extends Xro_config {
 	    
 	    $this->signatures['oauth_token'] = $access_token;
 	    $this->signatures['oauth_secret'] = $access_token_secret;
-	    if ($this->xro_app_type =! "Public") {
-			$this->signatures['oauth_session_handle'] = $oauth_session_handle;
-		}
+		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
 	    //////////////////////////////////////////////////////////////////////
 	
 		return $this->signatures; 
@@ -228,7 +226,7 @@ class Xero extends Xro_config {
 		
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
-	    //$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
+	    $this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
 	    //////////////////////////////////////////////////////////////////////
 
 	    // Xero API Access:
@@ -280,7 +278,7 @@ class Xero extends Xro_config {
 		
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
-		//	$this->signatures['oauth_session_handle'] = $oauth_session_handle;
+		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
 	    //////////////////////////////////////////////////////////////////////
 			
 	    // Xero API PUT:
@@ -338,7 +336,7 @@ class Xero extends Xro_config {
 
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
-		// $this->signatures['oauth_session_handle'] = $oauth_session_handle;
+		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
 
 	    //////////////////////////////////////////////////////////////////////
 
@@ -395,9 +393,7 @@ class Xero extends Xro_config {
 		
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
-	    if ($this->xro_app_type =! "Public") {
-			$this->signatures['oauth_session_handle'] = $oauth_session_handle;
-		}
+		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
 		
 		$oauthObject = new OAuthSimple();
 	
@@ -417,7 +413,7 @@ class Xero extends Xro_config {
 		$r = curl_exec($ch);
 		parse_str($r, $returned_items);	
 
-		// pop new access token into session
+		// put new access token into session
 		$ci->session->set_userdata($returned_items);	   
 
 		curl_close($ch); //exit;
