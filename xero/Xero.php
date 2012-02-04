@@ -209,7 +209,12 @@ class Xero extends Xro_config {
 	    
 	    $this->signatures['oauth_token'] = $access_token;
 	    $this->signatures['oauth_secret'] = $access_token_secret;
+<<<<<<< HEAD
 		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
+=======
+ 	    $this->signatures['oauth_session_handle'] = $oauth_session_handle;
+	
+>>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
 	    //////////////////////////////////////////////////////////////////////
 	
 		return $this->signatures; 
@@ -225,8 +230,13 @@ class Xero extends Xro_config {
 		$oauthObject = new OAuthSimple();
 		
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
+<<<<<<< HEAD
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
 	    $this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
+=======
+	   	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
+	    	$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
+>>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
 	    //////////////////////////////////////////////////////////////////////
 
 	    // Xero API Access:
@@ -277,8 +287,13 @@ class Xero extends Xro_config {
 		$oauthObject = new OAuthSimple();
 		
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
+<<<<<<< HEAD
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
 		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
+=======
+	    	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
+		$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
+>>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
 	    //////////////////////////////////////////////////////////////////////
 			
 	    // Xero API PUT:
@@ -335,8 +350,13 @@ class Xero extends Xro_config {
 		$oauthObject = new OAuthSimple();
 
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
+<<<<<<< HEAD
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
 		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
+=======
+	    	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
+	 	$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
+>>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
 
 	    //////////////////////////////////////////////////////////////////////
 
@@ -392,8 +412,13 @@ class Xero extends Xro_config {
 		$ci=& get_instance();
 		
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
+<<<<<<< HEAD
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
 		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
+=======
+	   	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
+	     	$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
+>>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
 		
 		$oauthObject = new OAuthSimple();
 	
@@ -422,9 +447,9 @@ class Xero extends Xro_config {
 	protected function set_curl_options() {
 		
 		if ($this->xro_app_type == "Partner") {
-			$options[CURLOPT_SSLCERT] = '/var/www/html/proptuts/ssl/entrust-cert.pem';
-			$options[CURLOPT_SSLKEYPASSWD] = 'magnetic'; 
-			$options[CURLOPT_SSLKEY] = '/var/www/html/proptuts/ssl/entrust-private.pem';
+			$options[CURLOPT_SSLCERT] = 'path/entrust-cert.pem';
+			$options[CURLOPT_SSLKEYPASSWD] = '[password]
+			$options[CURLOPT_SSLKEY] = 'path/entrust-private.pem';
 		}
 		$options[CURLOPT_VERBOSE] = 1;
     	$options[CURLOPT_RETURNTRANSFER] = 1;
