@@ -17,7 +17,7 @@ https://[yourdomain]/xero_authorize
 (this url should point to the xero_authorize controller)
 
 OAuth callback domain
-ablitica.com
+[yourdomain]
 
 See the demo in action here:
 https://ablitica.com/dev/codeigniter/xero_demo
