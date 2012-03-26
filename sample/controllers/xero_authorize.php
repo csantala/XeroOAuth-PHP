@@ -11,7 +11,7 @@ class Xero_authorize extends CI_Controller {
 			// save Xero access_token to session
 			$this->session->set_userdata($authorization);
 
-			redirect(site_url() . 'settings');
+			redirect(site_url() . 'xero_demo');
 		}
 	}
 }

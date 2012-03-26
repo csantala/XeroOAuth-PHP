@@ -1,86 +1,87 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
 
-/**
-  * Xero.php
-  * 
-  * A Xero OAuth1.0a authentication and API library for Codeigniter.
-  * 
-  * Constructed from code by Ronan Quirke
-  * @link https://github.com/XeroAPI/XeroOAuth-PHP 
-  *
-  * @author Chris Santala <csantala@gmail.com>
-  * @author Ronan Quirke
-  *
-  * DISCLAIMER OF WARRANTY
-  * 
-  * This source code is provided "as is" and without warranties as to performance or merchantability. 
-  * The author and/or distributors of this source code may have made statements about this source code.
-  * Any such statements do not constitute warranties and shall not be relied on by the user in deciding whether to use this source code.
-  * This source code is provided without any express or implied warranties whatsoever. 
-  * Because of the diversity of conditions and hardware under which this source code may be used, no warranty of fitness for a particular purpose is offered.
-  * The user is advised to test the source code thoroughly before relying on it. The user must assume the entire risk of using the source code. Have fun.
-  */
- 
 require('OAuthSimple.php');
-require('Xro_config.php');
 
+define("XRO_APP_TYPE", "Public");
 define('BASE_PATH',realpath('.'));
 
-class Xero extends Xro_config {
-	
-	protected $debug = FALSE;
+class Xero {
 	
 	// different app method defaults
-	protected $xro_defaults = array('xero_url' => 'https://api.xero.com/api.xro/2.0',
-		'site' => 'https://api.xero.com',
-		'authorize_url' => 'https://api.xero.com/oauth/Authorize',
-		'signature_method' => 'HMAC-SHA1');
+	private $xro_defaults = array( 'xero_url'     => 'https://api.xero.com/api.xro/2.0',
+	                     'site'    => 'https://api.xero.com',
+	                     'authorize_url'    => 'https://api.xero.com/oauth/Authorize',
+	                     'signature_method'    => 'HMAC-SHA1');
 	                     
-	protected $xro_private_defaults = array('xero_url' => 'https://api.xero.com/api.xro/2.0',
-		'site' => 'https://api.xero.com',
-		'authorize_url' => 'https://api.xero.com/oauth/Authorize',
-		'signature_method' => 'RSA-SHA1');
+	private $xro_private_defaults = array( 'xero_url'     => 'https://api.xero.com/api.xro/2.0',
+	                     'site'    => 'https://api.xero.com',
+	                     'authorize_url'    => 'https://api.xero.com/oauth/Authorize',
+	                     'signature_method'    => 'RSA-SHA1');
 	                     
-	protected $xro_partner_defaults = array( 'xero_url' => 'https://api-partner.network.xero.com/api.xro/2.0',
-		'site' => 'https://api-partner.network.xero.com',
-		'authorize_url' => 'https://api.xero.com/oauth/Authorize',
-		'accesstoken_url' => 'https://api-partner.xero.com/oauth/AccessToken',
-		'signature_method' => 'RSA-SHA1');
-
+	private $xro_partner_defaults = array( 'xero_url'     => 'https://api-partner.network.xero.com/api.xro/2.0',
+	                     'site'    => 'https://api-partner.network.xero.com',
+	                     'authorize_url'    => 'https://api.xero.com/oauth/Authorize',
+	                     'accesstoken_url'    => 'https://api-partner.xero.com/oauth/AccessToken',
+	                     'signature_method'    => 'RSA-SHA1');
+	                     
+	private $xro_partner_mac_defaults = array( 'xero_url'     => 'https://api-partner2.network.xero.com/api.xro/2.0',
+	                     'site'    => 'https://api-partner2.network.xero.com',
+	                     'authorize_url'    => 'https://api.xero.com/oauth/Authorize',
+	                     'accesstoken_url'    => 'https://api-partner2.xero.com/oauth/AccessToken',
+	                     'signature_method'    => 'RSA-SHA1');
+	                     
 	// standard Xero OAuth stuff
-	protected $xro_consumer_options = array( 'request_token_path' => '/oauth/RequestToken',
-		'access_token_path' => '/oauth/AccessToken',
-		'authorize_path' => '/oauth/Authorize');
-				 					 
-	function __construct() {
+	private $xro_consumer_options = array( 'request_token_path'    => '/oauth/RequestToken',
+	                     'access_token_path'    => '/oauth/AccessToken',
+	                     'authorize_path'    => '/oauth/Authorize');
+	
+	// local
+	//private $oauth_callback = 'http://ci.loc/xero_authorize';
+	
+	// production
+	private $oauth_callback = 'https://ablitica.com/dev/codeigniter/xero_authorize';
+	                       	 
+	private $signatures = array(
+		// local
+		//'consumer_key' => 'FZ4FXWY66I5ZX6CBIEJWHYQW2HZQRJ',
+		//'shared_secret' => 'OISWUWMJYIR1KSROLV15BCQH4BL8RZ',
 		
-		switch ($this->xro_app_type) {
-		case "Private":
-		    $this->xro_settings = $this->xro_private_defaults;
-		    $_GET['oauth_verifier'] = 1;
-		   	$_COOKIE['oauth_token_secret'] = $this->signatures['shared_secret'];
-		   	$_GET['oauth_token'] =  $this->signatures['consumer_key'];
-		    break;
-		case "Public":
-		    $this->xro_settings = $this->xro_defaults;
-		    break;
-		case "Partner":
-		    $this->xro_settings = $this->xro_partner_defaults;
-		    break;
-		}
-	}
+		// production
+		'consumer_key' => 'B8DNMTXCJAHO77QTIXVEPNKFTD41YG',
+		'shared_secret' => 'WQPPQBPKH9F11XSAILZMQL71F6AEDH',
+		// 'rsa_private_key' => BASE_PATH . '/certs/rq-partner-app-2-privatekey.pem',
+		// 'rsa_public_key'	=> BASE_PATH . '/certs/rq-partner-app-2-publickey.cer'
+	 );
 
 	function oauth() {
-
+	
 		$oauthObject = new OAuthSimple();
 		$output = 'Authorizing...';
 		
 		# Set some standard curl options....
 		$options = $this->set_curl_options();
 		                    
+		switch (XRO_APP_TYPE) {
+		    case "Private":
+		        $xro_settings = $this->xro_private_defaults;
+		        $_GET['oauth_verifier'] = 1;
+		       	$_COOKIE['oauth_token_secret'] = $this->signatures['shared_secret'];
+		       	$_GET['oauth_token'] =  $this->signatures['consumer_key'];
+		        break;
+		    case "Public":
+		        $xro_settings = $this->xro_defaults;
+		        break;
+		    case "Partner":
+		        $xro_settings = $this->xro_partner_defaults;
+		        break;
+		    case "Partner_Mac":
+		        $xro_settings = $this->xro_partner_mac_defaults;
+		        break;
+		}
+		
 		// In step 3, a verifier will be submitted.  If it's not there, we must be
 		// just starting out. Let's do step 1 then.
-		if (!isset($_GET['oauth_verifier'])) { 
+		if (!isset($_GET['oauth_verifier'])) {
 		    ///////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 		    // Step 1: Get a Request Token
 		    //
@@ -91,13 +92,13 @@ class Xero extends Xro_config {
 		    // authorization on their side is finished.
 		    //
 		    $result = $oauthObject->sign(array(
-		        'path' => $this->xro_settings['site'].$this->xro_consumer_options['request_token_path'],
+		        'path' => $xro_settings['site'].$this->xro_consumer_options['request_token_path'],
 		        'parameters' => array(
-		        'scope' => $this->xro_settings['xero_url'],
+		        'scope' => $xro_settings['xero_url'],
 		        'oauth_callback' => $this->oauth_callback,
-		        'oauth_signature_method' => $this->xro_settings['signature_method']),
+		        'oauth_signature_method' => $xro_settings['signature_method']),
 		        'signatures'=> $this->signatures));
-
+		
 		    // The above object generates a simple URL that includes a signature, the 
 		    // needed parameters, and the web page that will handle our request.  I now
 		    // "load" that web page into a string variable.
@@ -105,22 +106,21 @@ class Xero extends Xro_config {
 		    
 			curl_setopt_array($ch, $options);
 		
-		   if($this->debug){
+		    if(isset($_GET['debug'])){
 		    	echo 'signed_url: ' . $result['signed_url'] . '<br/>';
-		   }
-		  
+		    }
+		    
 		    curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
 		    $r = curl_exec($ch);
-		    if($this->debug){
+		    if(isset($_GET['debug'])){
 		  	  echo 'CURL ERROR: ' . curl_error($ch) . '<br/>';
 		    }
 		
 		    curl_close($ch);
 		
-			if($this->debug){
+			if(isset($_GET['debug'])){
 		    	echo 'CURL RESULT: ' . print_r($r) . '<br/>';
 		    }
-		    
 		    // We parse the string for the request token and the matching token
 		    // secret. Again, I'm not handling any errors and just plough ahead 
 		    // assuming everything is hunky dory.
@@ -128,10 +128,10 @@ class Xero extends Xro_config {
 		    $request_token = $returned_items['oauth_token'];
 		    $request_token_secret = $returned_items['oauth_token_secret'];
 		
-			if($this->debug){
+			if(isset($_GET['debug'])){
 		    	echo 'request_token: ' . $request_token . '<br/>';
 		    }
-
+		    
 		    // We will need the request token and secret after the authorization.
 		    // Google will forward the request token, but not the secret.
 		    // Set a cookie, so the secret will be available once we return to this page.
@@ -146,15 +146,15 @@ class Xero extends Xro_config {
 		    // so the user can authorize our access request.  The user could also deny
 		    // the request, so don't forget to add something to handle that case.
 		    $result = $oauthObject->sign(array(
-		        'path' => $this->xro_settings['authorize_url'],
-		        'parameters' => array(
+		        'path'      => $xro_settings['authorize_url'],
+		        'parameters'=> array(
 		        'oauth_token' => $request_token,
-		        'oauth_signature_method' => $this->xro_settings['signature_method']),
-		        'signatures' => $this->signatures));
+		        'oauth_signature_method' => $xro_settings['signature_method']),
+		        'signatures'=> $this->signatures));
 		
 		    // See you in a sec in step 3.
-		    if($this->debug){
-		    echo 'signed_url: ' . $result['signed_url'];
+		    if(isset($_GET['debug'])){
+		    echo 'signed_url: ' . $result[signed_url];
 		    }else{
 		    header("Location:$result[signed_url]");
 		    }
@@ -178,14 +178,14 @@ class Xero extends Xro_config {
 		    $this->signatures['oauth_token'] = $_GET['oauth_token'];
 		    
 		    // only need to do this for non-private apps
-		    if($this->xro_app_type != 'Private') {
+		    if(XRO_APP_TYPE!='Private') {
 				// Build the request-URL...
 				$result = $oauthObject->sign(array(
-					'path' => $this->xro_settings['site'].$this->xro_consumer_options['access_token_path'],
-					'parameters' => array(
+					'path'		=> $xro_settings['site'].$this->xro_consumer_options['access_token_path'],
+					'parameters'=> array(
 					'oauth_verifier' => $_GET['oauth_verifier'],
-					'oauth_token' => $_GET['oauth_token'],
-					'oauth_signature_method' => $this->xro_settings['signature_method']),
+					'oauth_token'	 => $_GET['oauth_token'],
+					'oauth_signature_method' => $xro_settings['signature_method']),
 					'signatures'=> $this->signatures));
 			
 				// ... and grab the resulting string again. 
@@ -193,12 +193,12 @@ class Xero extends Xro_config {
 				curl_setopt_array($ch, $options);
 				curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
 				$r = curl_exec($ch);
-	
+		
 				// Voila, we've got an access token.
 				parse_str($r, $returned_items);		   
-				$access_token = $returned_items['oauth_token'];
-				$access_token_secret = $returned_items['oauth_token_secret'];
-				$oauth_session_handle = $returned_items['oauth_session_handle'];
+					$access_token = $returned_items['oauth_token'];
+					$access_token_secret = $returned_items['oauth_token_secret'];
+				//	$oauth_session_handle = $returned_items['oauth_session_handle'];
 			} 
 			else {
 				$access_token = $this->signatures['oauth_token'];
@@ -209,67 +209,58 @@ class Xero extends Xro_config {
 	    
 	    $this->signatures['oauth_token'] = $access_token;
 	    $this->signatures['oauth_secret'] = $access_token_secret;
-<<<<<<< HEAD
-		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
-=======
- 	    $this->signatures['oauth_session_handle'] = $oauth_session_handle;
-	
->>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
+	    //$this->signatures['oauth_session_handle'] = $oauth_session_handle;
 	    //////////////////////////////////////////////////////////////////////
 	
 		return $this->signatures; 
+		//$_SESSION['oauth_token'] = $access_token;
+		//$_SESSION['oauth_secret'] = $access_token_secret;
 				
 	}
 	
+		
 	function api_call($end_point, $id = null) {
 			
-		# Set some standard curl options....
-		$options = $this->set_curl_options();
+		$options[CURLOPT_VERBOSE] = 1;
+		$options[CURLOPT_RETURNTRANSFER] = 1;
+		$options[CURLOPT_SSL_VERIFYHOST] = 0;
+		$options[CURLOPT_SSL_VERIFYPEER] = 0;
+		$useragent = (isset($useragent)) ? (empty($useragent) ? 'XeroOAuth-PHP' : $useragent) : 'XeroOAuth-PHP'; 
+		$options[CURLOPT_USERAGENT] = $useragent;
 				
 		$ci=& get_instance(); 
 		$oauthObject = new OAuthSimple();
 		
+		//ds($ci->session->userdata,1);
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
-<<<<<<< HEAD
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
-	    $this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
-=======
-	   	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
-	    	$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
->>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
+	    //$signatures['oauth_session_handle'] = $_SESSION['oauth_session_handle'];
 	    //////////////////////////////////////////////////////////////////////
-
+	    
+	    $xro_settings = $this->xro_defaults;
+	    
 	    // Xero API Access:
 	    $oauthObject->reset();
 	    $result = $oauthObject->sign(array(
-	        'path' => $this->xro_settings['xero_url'].'/'.$end_point.'/'.$id,
+	        'path' => $xro_settings['xero_url'].'/'.$end_point.'/'.$id,
 	        'parameters' => array(
-	    	//   'order' => urlencode($_REQUEST['order']),
-				'oauth_signature_method' => $this->xro_settings['signature_method']),
+	    	//	'order' => urlencode($_REQUEST['order']),
+				'oauth_signature_method' => $xro_settings['signature_method']),
 	       		'signatures'=> $this->signatures
 			));
-
 		$ch = curl_init();
 		curl_setopt_array($ch, $options);
 	    curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
 		$r = curl_exec($ch);
 		curl_close($ch);
 		
-		parse_str($r, $returned_items);	
-
+		parse_str($r, $returned_items);		   
+		
 		// error handling
-		if (isset($returned_items['oauth_problem'])) {			
-			// check for expired access token and renew
-		    // then re-call API
-			if ($returned_items['oauth_problem'] == 'token_expired') {
-				$this->renew_access_token();
-				$r = $this->api_call($end_point, $id);
-			}
-			else {
-				$ci->session->sess_destroy();
-				// dump to screen error and terminate.
-				echo "<pre>"; print_r($returned_items); echo "</pre>"; exit;
-			}
+		if (isset($returned_items['oauth_problem'])) {
+			$ci->session->sess_destroy();
+			// dump to secreen error and terminate.
+			ds($r,1);
 		}
 
 		// all good return results from API
@@ -280,33 +271,62 @@ class Xero extends Xro_config {
 	
 	function api_put($data) {
 		
-		# Set some standard curl options....
-		$options = $this->set_curl_options();
+		$options[CURLOPT_VERBOSE] = 1;
+		$options[CURLOPT_RETURNTRANSFER] = 1;
+		$options[CURLOPT_SSL_VERIFYHOST] = 0;
+		$options[CURLOPT_SSL_VERIFYPEER] = 0;
+		$useragent = (isset($useragent)) ? (empty($useragent) ? 'XeroOAuth-PHP' : $useragent) : 'XeroOAuth-PHP'; 
+		$options[CURLOPT_USERAGENT] = $useragent;
 				
 		$ci=& get_instance(); 
 		$oauthObject = new OAuthSimple();
 		
+		//ds($ci->session->userdata,1);
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
-<<<<<<< HEAD
 	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
-		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
-=======
-	    	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
-		$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
->>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
+	   // $signatures['oauth_session_handle'] = $_SESSION['oauth_session_handle'];
 	    //////////////////////////////////////////////////////////////////////
+	    
+	    $xro_settings = $this->xro_defaults;
 			
-	    // Xero API PUT:
+	    // Example Xero API PUT:
 	    $oauthObject->reset();
 	    $result = $oauthObject->sign(array(
-	        'path' => $this->xro_settings['xero_url'].'/Contacts/',
-	        'action' => 'PUT',
+	        'path'      => $xro_settings['xero_url'].'/Contacts/',
+	        'action'	=> 'PUT',
 	        'parameters'=> array(
-			'oauth_signature_method' => $this->xro_settings['signature_method']),
+			'oauth_signature_method' => $xro_settings['signature_method']),
 	        'signatures'=> $this->signatures));
-	    
-		// generate contact xml
-		$xml = $this->contact_xml($data);
+	        
+	    $xml = "<Contact>
+	<Name>".$data['name']."</Name>
+	<FirstName>".$data['first_name']."</FirstName>
+	<LastName>".$data['last_name']."</LastName>
+	<EmailAddress>".$data['email']."</EmailAddress>
+	<Phones>
+		<Phone><PhoneType>MOBILE</PhoneType><PhoneNumber>".$data['mobile']."</PhoneNumber></Phone>
+		<Phone><PhoneType>DEFAULT</PhoneType><PhoneNumber>".$data['landline']."</PhoneNumber></Phone>
+		<Phone><PhoneType>DDI</PhoneType><PhoneNumber>".$data['alt']."</PhoneNumber></Phone>
+	</Phones>
+	<Addresses>
+		<Address>
+			<AddressType>STREET</AddressType>
+			<AddressLine1>".$data['a_line_1']."</AddressLine1>
+			<City>".$data['a_city']."</City>
+			<Region>".$data['a_region']."</Region>
+			<PostalCode>".$data['a_code']."</PostalCode>
+			<Country>".$data['a_country']."</Country>
+		</Address>
+		<Address>
+			<AddressType>POBOX</AddressType>
+			<AddressLine1>".$data['ma_line_1']."</AddressLine1>
+			<City>".$data['ma_city']."</City>
+			<Region>".$data['ma_region']."</Region>
+			<PostalCode>".$data['ma_code']."</PostalCode>
+			<Country>".$data['ma_country']."</Country>
+		</Address>
+	</Addresses>
+	</Contact>";
 	
 		$fh  = fopen('php://memory', 'w+');
 		fwrite($fh, $xml);
@@ -324,51 +344,74 @@ class Xero extends Xro_config {
 		
 		// error handling
 		if (isset($returned_items['oauth_problem'])) {
-			// check for expired access token and renew
-		    // then re-call API
-			if ($returned_items['oauth_problem'] == 'token_expired') {
-				$this->renew_access_token();
-				$r = $this->api_put($data);
-			}
-			else {
-				$ci->session->sess_destroy();
-				// dump to secreen error and terminate.
-				echo "<pre>"; print_r($returned_items); echo "</pre>"; exit;
-			}
+			$ci->session->sess_destroy();
+			// dump to secreen error and terminate.
+			ds($r,1);
 		}
 
 		// all good return results from API
 		return $r;
 	}
 	
+	// adds or updates a new client
 	function api_post($data) {
 		
-		# Set some standard curl options....
-		$options = $this->set_curl_options();
+		$options[CURLOPT_VERBOSE] = 1;
+		$options[CURLOPT_RETURNTRANSFER] = 1;
+		$options[CURLOPT_SSL_VERIFYHOST] = 0;
+		$options[CURLOPT_SSL_VERIFYPEER] = 0;
+		$useragent = (isset($useragent)) ? (empty($useragent) ? 'XeroOAuth-PHP' : $useragent) : 'XeroOAuth-PHP'; 
+		$options[CURLOPT_USERAGENT] = $useragent;
 				
 		$ci=& get_instance(); 
 		$oauthObject = new OAuthSimple();
-
+		
+		//ds($ci->session->userdata,1);
 		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
-<<<<<<< HEAD
-	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
-		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
-=======
-	    	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
-	 	$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
->>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
-
+	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
+	   // 	$this->signatures['oauth_session_handle'] = $_SESSION['oauth_session_handle'];
 	    //////////////////////////////////////////////////////////////////////
-
+	    
+	       $xro_settings = $this->xro_defaults;
+		
 	    // update contact 
-	    $xml = $this->contact_xml($data);
+	    $xml = "<Contact>
+	<Name>".$data['name']."</Name>
+	<FirstName>".$data['first_name']."</FirstName>
+	<LastName>".$data['last_name']."</LastName>
+	<EmailAddress>".$data['email']."</EmailAddress>
+	<Phones>
+		<Phone><PhoneType>MOBILE</PhoneType><PhoneNumber>".$data['mobile']."</PhoneNumber></Phone>
+		<Phone><PhoneType>DEFAULT</PhoneType><PhoneNumber>".$data['landline']."</PhoneNumber></Phone>
+		<Phone><PhoneType>DDI</PhoneType><PhoneNumber>".$data['alt']."</PhoneNumber></Phone>
+	</Phones>
+	<Addresses>
+		<Address>
+			<AddressType>STREET</AddressType>
+			<AddressLine1>".$data['a_line_1']."</AddressLine1>
+			<City>".$data['a_city']."</City>
+			<Region>".$data['a_region']."</Region>
+			<PostalCode>".$data['a_code']."</PostalCode>
+			<Country>".$data['a_country']."</Country>
+		</Address>
+		<Address>
+			<AddressType>POSTBOX</AddressType>
+			<AddressLine1>".$data['ma_line_1']."</AddressLine1>
+			<City>".$data['ma_city']."</City>
+			<Region>".$data['ma_region']."</Region>
+			<PostalCode>".$data['ma_code']."</PostalCode>
+			<Country>".$data['ma_country']."</Country>
+		</Address>
+	</Addresses>
+	</Contact>";
+	
 	
 	    $oauthObject->reset();
 	    $result = $oauthObject->sign(array(
-	        'path' => $this->xro_settings['xero_url'].'/Contacts/',
-	        'action' => 'POST',
+	        'path'      => $xro_settings['xero_url'].'/Contacts/',
+	        'action'	=> 'POST',
 	        'parameters'=> array(
-			'oauth_signature_method' => $this->xro_settings['signature_method'],
+			'oauth_signature_method' => $xro_settings['signature_method'],
 			'xml' => $xml),
 	        'signatures'=> $this->signatures));
 	        
@@ -387,70 +430,59 @@ class Xero extends Xro_config {
 		   
 		// error handling
 		if (isset($returned_items['oauth_problem'])) {
-			// check for expired access token and renew
-		    // then re-call API
-			if ($returned_items['oauth_problem'] == 'token_expired') {
-				$this->renew_access_token();
-				$r = $this->api_post($data);
-			}
-			else {
-				$ci->session->sess_destroy();
-				// dump to secreen error and terminate.
-				echo "<pre>"; print_r($returned_items); echo "</pre>"; exit;
-			}
+			$ci->session->sess_destroy();
+			// dump to secreen error and terminate.
+			ds($r,1);
 		}
 
 		// all good return results from API
 		return $r;
 	}
-	
-	function renew_access_token() {
 		
-		# Set some standard curl options....
-		$options = $this->set_curl_options();
+	function access_token_swap() {
+		require 'XeroOAuth.php';
+		require_once('_config.php');
 		
-		$ci=& get_instance();
-		
-		$this->signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
-<<<<<<< HEAD
-	    $this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
-		$this->signatures['oauth_session_handle'] = $oauth_session_handle;
-=======
-	   	$this->signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];	
-	     	$this->signatures['oauth_session_handle'] = $ci->session->userdata['oauth_session_handle'];
->>>>>>> 2edfc79312f6b31fd2a5ab3f7d69ec8d030ce7da
-		
+		$options[CURLOPT_VERBOSE] = 1;
+		$options[CURLOPT_RETURNTRANSFER] = 1;
+		$options[CURLOPT_SSL_VERIFYHOST] = 0;
+		$options[CURLOPT_SSL_VERIFYPEER] = 0;
+		$useragent = (isset($useragent)) ? (empty($useragent) ? 'XeroOAuth-PHP' : $useragent) : 'XeroOAuth-PHP'; 
+		$options[CURLOPT_USERAGENT] = $useragent;
+				
+		$xro_settings = $xro_defaults;
+				
+		$ci=& get_instance(); 
 		$oauthObject = new OAuthSimple();
-	
-		$oauthObject->reset();
-    	$result = $oauthObject->sign(array(
-        	'path' => $this->xro_settings['site'].$this->xro_consumer_options['access_token_path'],
-        	'parameters'=> array(
-            'scope' => $this->xro_settings['xero_url'],
-            'oauth_session_handle' => $this->signatures['oauth_session_handle'],
-            'oauth_token' => $this->signatures['oauth_token'],
-            'oauth_signature_method' => $this->xro_settings['signature_method']),
-        'signatures'=> $this->signatures));
 		
+		$signatures['oauth_token'] = $ci->session->userdata['oauth_token'];
+	    $signatures['oauth_secret'] = $ci->session->userdata['oauth_secret'];
+	
+			$oauthObject->reset();
+	    	$result = $oauthObject->sign(array(
+	        	'path'      => $xro_settings['site'].$this->xro_consumer_options['access_token_path'],
+	        	'parameters'=> array(
+	            'scope'         => $xro_settings['xero_url'],
+	      //      'oauth_session_handle'	=> $signatures['oauth_session_handle'],
+	            'oauth_token'	=> $signatures['oauth_token'],
+	            'oauth_signature_method' => $xro_settings['signature_method']),
+	        'signatures'=> $signatures));
 		$ch = curl_init();
 		curl_setopt_array($ch, $options);
 	    curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
 		$r = curl_exec($ch);
 		parse_str($r, $returned_items);	
-
-		// put new access token into session
-		$ci->session->set_userdata($returned_items);	   
-
-		curl_close($ch); //exit;
+	  print_r($returned_items); die;
+		$ci->session->userdata['oauth_token'] = $returned_items['oauth_token'];
+		$ci->session->userdata['oauth_secret'] = $returned_items['oauth_token_secret'];
+		//$_SESSION['oauth_session_handle']   = $returned_items['oauth_session_handle'];
+		if($returned_items['oauth_token']){
+	//		return $returned_items['oauth_token'];
+		}
+		curl_close($ch);
 	}
 
 	protected function set_curl_options() {
-		
-		if ($this->xro_app_type == "Partner") {
-			$options[CURLOPT_SSLCERT] = 'path/entrust-cert.pem';
-			$options[CURLOPT_SSLKEYPASSWD] = '[password]
-			$options[CURLOPT_SSLKEY] = 'path/entrust-private.pem';
-		}
 		$options[CURLOPT_VERBOSE] = 1;
     	$options[CURLOPT_RETURNTRANSFER] = 1;
     	$options[CURLOPT_SSL_VERIFYHOST] = 0;
@@ -459,49 +491,6 @@ class Xero extends Xro_config {
     	$options[CURLOPT_USERAGENT] = $useragent;
 		return $options;
 	}
-	
-	// partial contact xml for demo purposes
-	private function contact_xml($data) {
-		return '<Contact>
-<Name>'.$data['name'].'</Name>
-<FirstName>'.$data['first_name'].'</FirstName>
-<LastName>'.$data['last_name'].'</LastName>
-</Contact>';
-
-// full contacts xml structure 
-/*
-<Contact>
-<Name>'.$data['name'].'</Name>
-<FirstName>'.$data['first_name'].'</FirstName>
-<LastName>'.$data['last_name'].'</LastName>
-<EmailAddress>".$data['email']."</EmailAddress>
-<Phones>
-	<Phone><PhoneType>MOBILE</PhoneType><PhoneNumber>".$data['mobile']."</PhoneNumber></Phone>
-	<Phone><PhoneType>DEFAULT</PhoneType><PhoneNumber>".$data['landline']."</PhoneNumber></Phone>
-	<Phone><PhoneType>DDI</PhoneType><PhoneNumber>".$data['alt']."</PhoneNumber></Phone>
-</Phones>
-<Addresses>
-	<Address>
-		<AddressType>STREET</AddressType>
-		<AddressLine1>".$data['a_line_1']."</AddressLine1>
-		<City>".$data['a_city']."</City>
-		<Region>".$data['a_region']."</Region>
-		<PostalCode>".$data['a_code']."</PostalCode>
-		<Country>".$data['a_country']."</Country>
-	</Address>
-	<Address>
-		<AddressType>POBOX</AddressType>
-		<AddressLine1>".$data['ma_line_1']."</AddressLine1>
-		<City>".$data['ma_city']."</City>
-		<Region>".$data['ma_region']."</Region>
-		<PostalCode>".$data['ma_code']."</PostalCode>
-		<Country>".$data['ma_country']."</Country>
-	</Address>
-</Addresses>
-</Contact>";
-*/
-	}
-
 }
 	
 /* End of file Xero.php */
